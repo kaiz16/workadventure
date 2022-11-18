@@ -39,7 +39,7 @@ services:
       - "traefik.http.middlewares.redirect-regex.redirectregex.permanent=false"
 
   play:
-    image: sigmaschoolmentor/workadventure-play:latest
+    image: sigmaschoolmentor/workadventure-play:${VERSION}
     command: yarn run start
     environment:
       - DEBUG_MODE=${DEBUG_MODE}
@@ -71,6 +71,7 @@ services:
       # Only used if you set up a JWT authentication mechanism in Ejabberd
       - EJABBERD_JWT_SECRET=${EJABBERD_JWT_SECRET}
       - EJABBERD_DOMAIN=${EJABBERD_DOMAIN}
+      - EJABBERD_WS_URI=${EJABBERD_WS_URI}
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.play.rule=Host(`${FRONT_HOST}`)"
@@ -195,27 +196,7 @@ services:
       - redisdata:/data
 
   ejabberd:
-    image: workadventure/ejabberd:v1
-    ports:
-      - "5443:5443"
-    environment:
-      - CTL_ON_CREATE=register ${EJABBERD_USER} ${EJABBERD_DOMAIN} ${EJABBERD_PASSWORD}
-      - JWT_SECRET=${EJABBERD_JWT_SECRET}
-      - EJABBERD_DOMAIN=${EJABBERD_DOMAIN}
-      - EJABBERD_USER=${EJABBERD_USER}
-      - EJABBERD_PASSWORD=${EJABBERD_PASSWORD}
-    volumes:
-      - ./ejabberd.template.yml:/opt/ejabberd/conf/ejabberd.template.yml
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.ejabberd.rule=Host(`${EJABBERD_HOST}`)"
-      - "traefik.http.routers.ejabberd.entryPoints=web"
-      - "traefik.http.services.ejabberd.loadbalancer.server.port=5443"
-      - "traefik.http.routers.ejabberd-ssl.rule=Host(`${EJABBERD_HOST}`)"
-      - "traefik.http.routers.ejabberd-ssl.entryPoints=websecure"
-      - "traefik.http.routers.ejabberd-ssl.service=ejabberd"
-      - "traefik.http.routers.ejabberd-ssl.tls=true"
-      - "traefik.http.routers.ejabberd-ssl.tls.certresolver=myresolver"
+    image: thecodingmachine/workadventure-simple-ecs:${VERSION}
 
   # map-storage:
   #   image: thecodingmachine/workadventure-map-storage:${VERSION}
